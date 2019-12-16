@@ -33,10 +33,7 @@ before_install:
   - sudo chmod 2777 /usr/local/lib/R /usr/local/lib/R/site-library $R_LIBS_USER
   - echo 'options(repos = c(CRAN = "https://cloud.r-project.org"))' > ~/.Rprofile.site
   - export R_PROFILE=~/.Rprofile.site
-  - sudo Rscript -e "install.packages('knitr', repos = 'https://', dependencies = TRUE)"
-  - sudo Rscript -e "install.packages('stringr', repos = 'https://cran.rstudio.com', dependencies = TRUE)"
-  - sudo Rscript -e "install.packages('checkpoint', repos = 'https://cran.rstudio.com', dependencies = TRUE)"
-  - sudo Rscript -e "install.packages('ggplot2', repos = 'https://cran.rstudio.com', dependencies = TRUE)"
+  - sudo Rscript -e "install.packages(setdiff(c('knitr'), installed.packages())); update.packages(lib.loc = Sys.getenv('R_LIBS_USER'), ask = FALSE, checkBuilt = TRUE)"
   - rvm default
   - gem install json kramdown jekyll bundler
 
