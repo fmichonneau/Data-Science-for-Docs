@@ -1,0 +1,45 @@
+# Travis CI is only used to check the lesson and is not involved in its deployment
+dist: xenial  # Ubuntu 16.04 (required for python 3.7)
+language: python
+python: 3.7
+
+env:
+  global:
+    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true # speeds up installation of html-proofer
+    - R_LIBS_USER=~/R/Library
+    - R_LIBS_SITE=/usr/local/lib/R/site-library:/usr/lib/R/site-library
+
+cache:
+  apt: true
+  bundler: true
+  directories:
+    - /home/travis/.rvm/
+    - $R_LIBS_USER
+
+branches:
+  only:
+  - gh-pages
+  - /.*/
+
+before_install:
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+  - echo "deb https://cloud.r-project.org/bin/linux/ubuntu xenial-cran35/" | sudo tee -a /etc/apt/sources.list
+  - sudo apt-get update -y
+  - sudo apt-get install -y r-base
+  - sudo mkdir -p /usr/local/lib/R/site-library $R_LIBS_USER
+  - sudo chmod 2777 /usr/local/lib/R /usr/local/lib/R/site-library $R_LIBS_USER
+  - echo 'options(repos = c(CRAN = "https://cloud.r-project.org"))' > ~/.Rprofile.site
+  - export R_PROFILE=~/.Rprofile.site
+  - sudo Rscript -e "install.packages('knitr', repos = 'https://', dependencies = TRUE)"
+  - sudo Rscript -e "install.packages('stringr', repos = 'https://cran.rstudio.com', dependencies = TRUE)"
+  - sudo Rscript -e "install.packages('checkpoint', repos = 'https://cran.rstudio.com', dependencies = TRUE)"
+  - sudo Rscript -e "install.packages('ggplot2', repos = 'https://cran.rstudio.com', dependencies = TRUE)"
+  - rvm default
+  - gem install json kramdown jekyll bundler
+
+install:
+  - pip install pyyaml
+
+script:
+  - make lesson-check-all
+  - make --always-make site
